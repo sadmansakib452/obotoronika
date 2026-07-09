@@ -1,0 +1,69 @@
+/* Global styles */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.no-scroll {
+  @apply overflow-hidden;
+}
+
+.form-group {
+  @apply grid lg:grid-cols-2 gap-4 mb-4;
+}
+.input-group {
+  label {
+    @apply text-gray-600 font-semibold text-sm mb-1 block obotoronika-text-color;
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Reset Shadcn default styles */
+.focus\:ring-ring:focus {
+  @apply !ring-primary;
+}
+.dark\:bg-slate-950:is(.dark *) {
+  @apply dark:!bg-dark;
+}
+
+.dark\:bg-slate-950:has(input:focus) {
+  @apply border-primary transition-colors;
+}
+.vue-star-rating-rating-text {
+  @apply hidden;
+}
+
+/* Product */
+
+.product {
+  @apply relative w-full mx-auto shadow-md rounded-b-md;
+
+  .img {
+    @apply w-full h-[220px] lg:h-[320px];
+
+    img {
+      @apply w-full h-full object-cover rounded-t-md;
+    }
+  }
+
+  button {
+    @apply absolute top-4 right-4 text-white z-10;
+  }
+  .meta {
+    @apply p-2 bg-white rounded-b-md;
+  }
+}

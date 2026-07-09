@@ -1,0 +1,7 @@
+.featured-products {
+  @apply my-20;
+
+  .featured-products-lists {
+    @apply w-full grid grid-cols-1 gap-2 mx-auto lg:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 lg:w-11/12;
+  }
+}

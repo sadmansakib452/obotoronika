@@ -1,0 +1,12 @@
+CREATE TABLE categories (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  slug TEXT NOT NULL,
+  thumbnail TEXT,
+  parent_id INTEGER REFERENCES categories(id) ON DELETE CASCADE,
+  deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

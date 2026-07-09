@@ -1,0 +1,14 @@
+{
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "node",
+    "types": ["@pinia/nuxt"],
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": ["./app/*"],
+      "@/*": ["./app/*"],
+      "@@/*": ["./*"]
+    }
+  }
+}

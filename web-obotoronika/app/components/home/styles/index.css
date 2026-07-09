@@ -1,0 +1,6 @@
+.products {
+  @apply my-12;
+  .products-lists {
+    @apply w-full grid grid-cols-2 gap-4 mx-auto lg:gap-8 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 lg:w-11/12;
+  }
+}

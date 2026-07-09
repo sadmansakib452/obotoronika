@@ -1,0 +1,7 @@
+name = "obotoronika-media-api"
+main = "src/index.js"
+compatibility_date = "2025-03-01"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "obotoronika-media"

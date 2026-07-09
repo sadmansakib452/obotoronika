@@ -1,0 +1,16 @@
+.summery {
+  @apply col-span-4;
+}
+.summery ul {
+  @apply list-none;
+}
+.summery ul li {
+  @apply flex justify-between mb-2;
+}
+.summery ul li b {
+  @apply font-medium obotoronika-title;
+}
+.sum span.absolute.inset-y-0.end-0.flex.items-center.px-3\.5 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}

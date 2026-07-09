@@ -1,0 +1,21 @@
+.section-management {
+  @apply flex gap-6 flex-col mb-20 lg:flex-row lg:gap-10;
+  h1 {
+    @apply text-lg font-semibold mb-4 obotoronika-title;
+  }
+  .available-sections {
+    @apply border obotoronika-border-color rounded-lg p-4 lg:w-1/2 shadow-sm;
+    ul li {
+      @apply border-b obotoronika-border-color py-4;
+      &:last-child {
+        @apply border-b-0;
+      }
+    }
+  }
+  .selected-sections {
+    @apply border obotoronika-border-color rounded-lg p-4 lg:w-1/2 shadow-sm;
+    .list-group-item{
+      @apply border obotoronika-border-color rounded-md mb-2 p-2.5 font-medium obotoronika-text-color flex justify-between;
+    }
+  }
+}

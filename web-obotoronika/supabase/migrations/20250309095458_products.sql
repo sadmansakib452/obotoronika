@@ -1,0 +1,45 @@
+CREATE TYPE product_status AS ENUM ('published', 'pending', 'draft', 'archived');
+CREATE TYPE product_availability AS ENUM ('in_stock', 'out_of_stock', 'pre_order', 'back_order', 'coming_soon');
+
+create extension if not exists "pgcrypto";
+
+CREATE TABLE products(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    merchant_id INTEGER NOT NULL REFERENCES merchants(id) ON DELETE CASCADE,
+    category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    sku TEXT,
+    files TEXT[],
+    price DECIMAL(10, 2),
+    cost_price DECIMAL(10, 2),
+    offer_price DECIMAL(10, 2),
+    track_inventory BOOLEAN DEFAULT false,
+    initial_stock INTEGER,
+    current_stock INTEGER,
+    low_stock_alert INTEGER,
+    availability product_availability DEFAULT 'in_stock',
+    global_trade_number TEXT,
+    manufacturer_number TEXT,
+    brand TEXT,
+    item_upc TEXT,
+    custom_fields JSONB,
+    free_shipping BOOLEAN DEFAULT false,
+    shipping_price DECIMAL(10, 2),
+    location_based_shipping BOOLEAN DEFAULT false,
+    location_based_shipping_price JSONB,
+    available_date TIMESTAMPTZ,
+    end_date TIMESTAMPTZ,
+    variants JSONB,
+    tags TEXT[],
+    page_title TEXT,
+    meta_keywords TEXT[],
+    meta_description TEXT,
+    product_url TEXT,
+    slug TEXT UNIQUE,
+    thumbnail TEXT,
+    status product_status DEFAULT 'draft',
+    product_visibility JSONB DEFAULT '{}'::JSONB,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+)

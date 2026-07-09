@@ -1,0 +1,3 @@
+supabase migration new schema_name
+#dbpw_qEvlLeQT1hBFFc9W
+lSDUz76OBmddFK5k

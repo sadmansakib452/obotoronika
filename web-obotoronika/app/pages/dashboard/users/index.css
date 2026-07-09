@@ -1,0 +1,35 @@
+.cards {
+    @apply grid md:grid-cols-2 lg:grid-cols-4 mt-6 gap-4;
+  
+    .card {
+      @apply border p-4 rounded-md bg-white dark:border-theme-border dark:bg-dark;
+  
+      .header {
+        @apply flex gap-4 items-center mb-4;
+  
+        span.icon {
+          @apply w-10 h-10 flex justify-center items-center rounded-lg text-white text-2xl;
+  
+          &.admin {
+            @apply bg-primary;
+          }
+  
+          &.manager {
+            @apply bg-[#2465ff];
+          }
+  
+          &.seller {
+            @apply bg-violet-600;
+          }
+  
+          &.customer {
+            @apply bg-green-600;
+          }
+        }
+  
+        h2 {
+          @apply font-bold obotoronika-text-color text-xl;
+        }
+      }
+    }
+  }

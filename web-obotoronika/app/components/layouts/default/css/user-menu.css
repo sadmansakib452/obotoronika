@@ -1,0 +1,8 @@
+ul.user-menu {
+    li {
+      a,
+      button {
+        @apply text-sm flex items-center w-full gap-1 mb-2 obotoronika-text;
+      }
+    }
+}

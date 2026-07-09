@@ -1,0 +1,8 @@
+1. Dynamic Sections - Progress 50%
+2. Advance Analytics Page - Progress 50%
+3. Payment system including all features - Progress 40%
+4. Many features will be like shopify (eg: dynamic variable) - Progress 30%
+5. Dynamic payment system (eg: admin can be any payment system integrate) - Progress 00%
+6. Fake order - Progress 00%
+7. Google/Facebook marketing system will be visible in our dashboard - Progress 00%
+8. AI - Progress 00%

@@ -1,0 +1,23 @@
+.home-section-2 {
+    @apply grid my-8 gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-8;
+
+    .item {
+        @apply h-auto rounded-lg relative lg:h-80;
+
+        img {
+            @apply rounded-lg;
+        }
+
+        .content {
+            @apply text-gray-800/95 absolute top-1/2 left-4 -translate-y-1/2;
+
+            .sub-title {
+                @apply uppercase md:text-lg font-light;
+            }
+
+            .title {
+                @apply capitalize font-Homenaje font-bold text-xl md:text-3xl;
+            }
+        }
+    }
+}

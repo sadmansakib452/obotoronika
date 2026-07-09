@@ -1,0 +1,41 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "division": "Dhaka"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [90.35, 23.7],
+            [90.4, 23.7],
+            [90.4, 23.75],
+            [90.35, 23.75],
+            [90.35, 23.7]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "division": "Chittagong"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [91.8, 22.3],
+            [91.85, 22.3],
+            [91.85, 22.35],
+            [91.8, 22.35],
+            [91.8, 22.3]
+          ]
+        ]
+      }
+    }
+  ]
+}
