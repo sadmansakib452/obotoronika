@@ -1,11 +1,11 @@
-# Deploys to Cloudflare Pages on every push to master.
+# Deploys to Cloudflare Pages on every push to main.
 # Required GitHub secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_PAGES_PROJECT_NAME
 name: Deploy to Cloudflare Pages
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:

@@ -64,6 +64,7 @@ const items = [
       <template #returned>
         <CustomerOrdersReturned />
       </template>
-    </UTabs>
+      </UTabs>
+    </div>
   </div>
 </template>

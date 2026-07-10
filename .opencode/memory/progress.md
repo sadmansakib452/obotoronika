@@ -2,26 +2,19 @@
 
 Last Updated: 2026-07-10
 
-## Current Status: Full Documentation Phase 1 ✅ Complete
+## Current Status: Phase 2 Connection Verification ✅ Complete
 
-### Completed (Old)
-- [x] Chapter 0-7: AI assistant setup (opencode foundation)
+### Completed — Phase 1: Documentation
+- [x] **Ch 0.1-0.4**: Full system scan (~140 endpoints, 25+ utils, 53 pages, 95 components, 12 stores, 53 migrations, ~35 RPCs)
+- [x] **Ch 1-10**: 29 documentation files in Bengali (pushed to git: `bbb128a`)
 
-### Completed (Phase 1 — Documentation)
-- [x] **Ch 0.1**: Comprehensive API scan (~140 endpoints across 21 modules) — issues documented
-- [x] **Ch 0.2**: Server Utils scan (25+ utility files: email, refund, SSL, etc.)
-- [x] **Ch 0.3**: Frontend scan (53 pages, ~95 components, 12 stores, 8 composables)
-- [x] **Ch 0.4**: Database scan (53 migrations, ~35 RPCs, 25+ tables)
-- [x] **Ch 1**: Root `README.md` — navigation hub
-- [x] **Ch 2**: `docs/README.md` — master index (বাংলা)
-- [x] **Ch 3**: `01-project-overview.md` — project পরিচিতি
-- [x] **Ch 4**: `02-architecture.md` — কিভাবে কাজ করে
-- [x] **Ch 5**: `03-tech-stack.md` — কেন এই টুলস
-- [x] **Ch 6**: Frontend docs (5 files — pages, components, stores, composables, styling)
-- [x] **Ch 7**: API docs (10 files — README + 9 module docs)
-- [x] **Ch 8**: Database docs (3 files — schema, migrations, RPCs)
-- [x] **Ch 9**: Feature flow docs (6 files — auth, payment, order, refund, cart, dashboard)
-- [x] **Ch 10**: Guides (3 files — setup, contributing, deployment)
+### Completed — Phase 2: Connection Verification
+- [x] **Ch 1**: Supabase — URL (200), anon key (auth works), service_role key (REST works), core tables (data present), RPCs tested (get_recommendations ✅, fn_get_return_stats ✅, count_by_role ⚠️ permission denied)
+- [x] **Ch 2**: Cloudflare/NuxtHub — API Token INVALID (expired), Zone ID unverified (might be Account ID), GitHub workflow targets `master` (repo uses `main`), NuxtHub workflow still `.example`
+- [x] **Ch 3**: Media Storage (obotoronika-media-api.workers.dev) — Root 200 ✅, upload endpoint 500 (separate worker issue)
+- [x] **Ch 4**: SSLCommerz Sandbox — Session created ✅ (store_id working), Gateway URL generated ✅
+- [x] **Ch 5**: Email SMTP — Gmail app password works ✅ (test email sent)
+- [x] **Ch 6**: Build — Fixed missing `</div>` in `customer/orders/index.vue` ✅, production build passes (17 MB, 3.54 MB gzip)
 
 ### Key Issues Found During Scan
 - Auth holes in 5 endpoints (auto-cancel, bandwidth-usage, user-location-summary, has-slug, merchants/:id)
@@ -32,7 +25,14 @@ Last Updated: 2026-07-10
 - No Zod validation in many handlers (manual validation)
 - bKash amount hardcoded
 - Invoice RPC migration needs `supabase db push`
-- Build error in `customer/orders/index.vue:35`
+- ~~Build error in `customer/orders/index.vue:35`~~ ✅ FIXED
+
+### Config Issues Found (Needs Manual Action)
+- **Cloudflare API Token** — INVALID, regenerate from Cloudflare Dashboard
+- **Cloudflare Zone ID** — might be Account ID, verify in Dashboard
+- **GitHub Workflow** — branch targets `master`, change to `main`
+- **NuxtHub Workflow** — rename `nuxthub.yml.example` → `nuxthub.yml`
+- **Media Worker Upload** — 500 error on POST /api/upload (separate worker code)
 
 ### Next: Feature Work or Bug Fixes
 - EmptyState component → all dashboard tables

@@ -38,3 +38,5 @@ coverage/
 # Media worker
 media-worker/node_modules/
 media-worker/dist/
+
+.data
