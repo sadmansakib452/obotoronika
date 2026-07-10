@@ -10,11 +10,13 @@ Last Updated: 2026-07-10
 
 ### Completed — Phase 2: Connection Verification
 - [x] **Ch 1**: Supabase — URL (200), anon key (auth works), service_role key (REST works), core tables (data present), RPCs tested (get_recommendations ✅, fn_get_return_stats ✅, count_by_role ⚠️ permission denied)
-- [x] **Ch 2**: Cloudflare/NuxtHub — API Token INVALID (expired), Zone ID unverified (might be Account ID), GitHub workflow targets `master` (repo uses `main`), NuxtHub workflow still `.example`
-- [x] **Ch 3**: Media Storage (obotoronika-media-api.workers.dev) — Root 200 ✅, upload endpoint 500 (separate worker issue)
+- [x] **Ch 2**: Cloudflare — Token VERIFIED ✅, Pages project "obotoronika" connected ✅, production branch set to `main` ✅, GitHub workflows fixed (master→main) ✅, env vars updated ✅
+- [x] **Ch 3**: Media Storage — Worker running ✅, R2 bucket exists ✅, upload/serve both work ✅ (previous 500 was test method issue)
 - [x] **Ch 4**: SSLCommerz Sandbox — Session created ✅ (store_id working), Gateway URL generated ✅
 - [x] **Ch 5**: Email SMTP — Gmail app password works ✅ (test email sent)
 - [x] **Ch 6**: Build — Fixed missing `</div>` in `customer/orders/index.vue` ✅, production build passes (17 MB, 3.54 MB gzip)
+- [x] **Deploy**: Live at https://obotoronika-l5o.pages.dev ✅ (auto-deploy on push to `main`)
+- [x] **Connection Info**: Created `.opencode/memory/connection-info.md` (gitignored, Bengali, all credentials + flow)
 
 ### Key Issues Found During Scan
 - Auth holes in 5 endpoints (auto-cancel, bandwidth-usage, user-location-summary, has-slug, merchants/:id)

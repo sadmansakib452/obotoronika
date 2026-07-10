@@ -40,3 +40,6 @@ media-worker/node_modules/
 media-worker/dist/
 
 .data
+
+# Opencode memory (connection info with credentials)
+.opencode/memory/connection-info.md
