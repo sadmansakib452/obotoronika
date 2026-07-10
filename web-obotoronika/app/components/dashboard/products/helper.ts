@@ -5,7 +5,7 @@ import convertFileToBase64 from '@@/shared/utils/convertFileToBase64'
 import type { FormSubmitEvent } from '#ui/types'
 
 // Function to create the schema dynamically
-export function createSchema(thumbnailRequired: boolean) {
+export function createSchema(hasExistingThumbnail: boolean) {
   return z
     .object({
       title: z
@@ -14,14 +14,14 @@ export function createSchema(thumbnailRequired: boolean) {
       sku: z
         .string().optional(),
       category_id: z
-        .number({
+        .coerce.number({
           required_error: 'Category is mandatory.',
           invalid_type_error: 'Category must be a valid number.',
         })
         .nonnegative('Category must be a positive number.'),
       description: z
         .string().optional(),
-      thumbnail: thumbnailRequired
+      thumbnail: hasExistingThumbnail
         ? z.any().optional()
         : z
             .instanceof(globalThis.File, {
@@ -32,19 +32,19 @@ export function createSchema(thumbnailRequired: boolean) {
                 'Thumbnail must be an image file (e.g., .jpg, .jpeg, .png).',
             }),
       files: z.any().optional(),
-      price: z.number({
+      price: z.coerce.number({
         required_error: 'Price is mandatory.',
         invalid_type_error: 'Price must be a valid number.',
-      }),
-      cost_price: z.number({
-        required_error: 'Price is mandatory.',
-        invalid_type_error: 'Price must be a valid number.',
-      }),
-      offer_price: z.number().optional().nullable(),
+      }).positive('Price must be greater than zero.'),
+      cost_price: z.coerce.number({
+        required_error: 'Cost Price is mandatory.',
+        invalid_type_error: 'Cost Price must be a valid number.',
+      }).nonnegative('Cost Price cannot be negative.'),
+      offer_price: z.coerce.number().optional().nullable(),
       track_inventory: z.boolean(),
-      current_stock: z.number().optional().nullable(),
-      low_stock_alert: z.number().optional().nullable(),
-      initial_stock: z.number().optional().nullable(),
+      current_stock: z.coerce.number().optional().nullable(),
+      low_stock_alert: z.coerce.number().optional().nullable(),
+      initial_stock: z.coerce.number().optional().nullable(),
       availability: z.string().optional().nullable(),
       global_trade_number: z.string().optional().nullable(),
       manufacturer_number: z.string().optional().nullable(),
@@ -52,7 +52,7 @@ export function createSchema(thumbnailRequired: boolean) {
       item_upc: z.string().optional().nullable(),
       custom_fields: z.any().optional().nullable(),
       free_shipping: z.boolean().optional().nullable(),
-      shipping_price: z.number().optional().nullable(),
+      shipping_price: z.coerce.number().optional().nullable(),
       locationBasedShipping: z.boolean().optional().nullable(),
       locationBasedShippingPrice: z.any().optional().nullable(),
       availableDate: z.string().optional().nullable(),

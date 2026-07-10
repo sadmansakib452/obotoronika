@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { Search, X } from 'lucide-vue-next'
-import { onKeyStroke, useDebounceFn } from '@vueuse/core'
-import { UInput, UIcon } from '#components'
+import { onClickOutside, useDebounceFn } from '@vueuse/core'
+import { UInput } from '#components'
 
 interface SearchProduct {
   id: string
@@ -10,15 +10,23 @@ interface SearchProduct {
   thumbnail: string
 }
 
-const isOpen = ref(false)
 const query = ref('')
 const suggestions = ref<SearchProduct[]>([])
 const isLoading = ref(false)
-const searchInputRef = ref<{ $el?: HTMLElement } | null>(null)
-
-useCustomBodyScrollLock(isOpen)
+const searchInputRef = ref<HTMLInputElement | null>(null)
+const wrapperRef = ref<HTMLElement | null>(null)
 
 const config = useRuntimeConfig()
+
+// Desktop: dropdown open state
+const isDropdownOpen = computed(() => query.value.trim().length > 0)
+
+// Mobile: overlay state
+const isMobileOpen = ref(false)
+
+onClickOutside(wrapperRef, () => {
+  closeDropdown()
+})
 
 const fetchSuggestions = useDebounceFn(async () => {
   const q = query.value.trim()
@@ -47,59 +55,102 @@ function onQueryInput() {
 
 function goToProduct(slug: string) {
   navigateTo(`/products/${slug}`)
-  closeSearch()
+  closeDropdown()
+  closeMobile()
 }
 
-function closeSearch() {
-  isOpen.value = false
+function closeDropdown() {
   query.value = ''
   suggestions.value = []
+}
+
+function openMobile() {
+  isMobileOpen.value = true
+  nextTick(() => {
+    const input = wrapperRef.value?.querySelector('.search-mobile-input') as HTMLInputElement | null
+    input?.focus()
+  })
+}
+
+function closeMobile() {
+  isMobileOpen.value = false
+  query.value = ''
+  suggestions.value = []
+}
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    closeDropdown()
+    closeMobile()
+  }
 }
 
 function thumbnailUrl(thumb: string) {
   return config.public.mediaUrl ? `${config.public.mediaUrl}${thumb}` : thumb
 }
 
-watch(isOpen, (open) => {
-  if (open) {
-    query.value = ''
-    suggestions.value = []
-    nextTick(() => searchInputRef.value?.$el?.querySelector('input')?.focus())
-  }
-})
-
-onKeyStroke('Escape', () => {
-  if (isOpen.value) closeSearch()
+onUnmounted(() => {
+  closeMobile()
 })
 </script>
 
 <template>
-  <div>
-    <button class="btn-3" @click="isOpen = true">
+  <div ref="wrapperRef" class="search-wrapper">
+    <!-- Desktop: inline search bar — just type, no overlay -->
+    <div class="search-bar hidden lg:flex">
+      <Search :size="20" class="search-bar-icon" />
+      <input
+        ref="searchInputRef"
+        v-model="query"
+        type="text"
+        placeholder="Search products..."
+        autocomplete="off"
+        class="search-bar-input"
+        @input="onQueryInput"
+        @keydown="handleKeydown"
+      >
+      <button
+        v-if="query"
+        type="button"
+        class="search-clear-btn"
+        aria-label="Clear search"
+        @click="query = ''; suggestions = []"
+      >
+        <X :size="16" />
+      </button>
+    </div>
+
+    <!-- Mobile: search icon trigger -->
+    <button class="search-mobile-trigger lg:hidden" aria-label="Search" @click="openMobile">
       <Search :size="20" />
-      <span class="hidden lg:inline">Search</span>
     </button>
-    <div :class="{ active: isOpen }" class="search-overlay">
-      <div class="search-overlay-inner">
-        <UInput
-          ref="searchInputRef"
-          v-model="query"
-          icon="i-heroicons-magnifying-glass-20-solid"
-          size="lg"
-          color="white"
-          :trailing="false"
-          placeholder="Search products..."
-          class="w-full"
-          autocomplete="off"
-          @input="onQueryInput"
-        />
-        <!-- Auto-suggest dropdown -->
-        <div
-          v-if="query.trim()"
-          class="absolute left-0 right-0 top-full z-50 mt-2 max-h-[min(70vh,400px)] overflow-y-auto rounded-lg border border-white/10 bg-white/95 shadow-xl backdrop-blur dark:bg-gray-900/95"
-        >
+
+    <!-- Mobile: full-screen search overlay -->
+    <teleport to="body">
+      <div v-if="isMobileOpen" class="search-mobile-overlay">
+        <div class="search-mobile-header">
+          <button type="button" class="search-mobile-close" aria-label="Close search" @click="closeMobile">
+            <X :size="20" />
+          </button>
+          <div class="search-mobile-input-wrap">
+            <Search :size="18" class="search-mobile-input-icon" />
+            <input
+              v-model="query"
+              type="text"
+              placeholder="Search products..."
+              autocomplete="off"
+              class="search-mobile-input"
+              autofocus
+              @input="onQueryInput"
+              @keydown="handleKeydown"
+            >
+          </div>
+        </div>
+
+        <!-- Suggestions -->
+        <div v-if="query.trim()" class="search-mobile-results">
           <div v-if="isLoading" class="flex items-center justify-center gap-2 px-4 py-6 text-gray-500">
-            <UIcon name="i-heroicons-arrow-path" class="h-5 w-5 animate-spin" />
+            <div class="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
             <span>Searching...</span>
           </div>
           <template v-else>
@@ -115,30 +166,47 @@ onKeyStroke('Escape', () => {
                 :alt="product.title"
                 class="h-12 w-12 shrink-0 rounded object-cover"
               >
-              <span class="line-clamp-2 text-gray-800 dark:text-gray-200">{{ product.title }}</span>
+              <span class="line-clamp-2 text-sm text-gray-800 dark:text-gray-200">{{ product.title }}</span>
             </NuxtLink>
             <p
               v-if="!isLoading && suggestions.length === 0"
-              class="px-4 py-6 text-center text-gray-500"
+              class="px-4 py-6 text-center text-sm text-gray-500"
             >
               No products found for "{{ query }}"
             </p>
           </template>
         </div>
       </div>
-      <button
-        type="button"
-        class="btn-3 search-close-btn"
-        aria-label="Close search"
-        @click="closeSearch"
-      >
-        <X />
-      </button>
+    </teleport>
+
+    <!-- Desktop: auto-suggest dropdown (no overlay, just dropdown below input) -->
+    <div v-if="isDropdownOpen" class="search-dropdown hidden lg:block">
+      <div v-if="isLoading" class="flex items-center justify-center gap-2 px-4 py-6 text-gray-500">
+        <div class="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+        <span>Searching...</span>
+      </div>
+      <template v-else>
+        <NuxtLink
+          v-for="product in suggestions"
+          :key="product.id"
+          :to="`/products/${product.slug}`"
+          class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+          @click.prevent="goToProduct(product.slug)"
+        >
+          <img
+            :src="thumbnailUrl(product.thumbnail)"
+            :alt="product.title"
+            class="h-12 w-12 shrink-0 rounded object-cover"
+          >
+          <span class="line-clamp-2 text-sm text-gray-800 dark:text-gray-200">{{ product.title }}</span>
+        </NuxtLink>
+        <p
+          v-if="!isLoading && suggestions.length === 0"
+          class="px-4 py-6 text-center text-sm text-gray-500"
+        >
+          No products found for "{{ query }}"
+        </p>
+      </template>
     </div>
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 bg-black bg-opacity-50 z-40 pointer-events-auto backdrop-blur-sm h-screen"
-      @click="closeSearch"
-    />
   </div>
 </template>

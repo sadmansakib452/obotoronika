@@ -25,21 +25,20 @@ const emit = defineEmits(['getFormData', 'getDataForDraft'])
 
 // Fetched Data from server
 // @ts-ignore
-const { data } = await useFetch(`/api/dashboard/categories`)
+const { data: catData, pending: catPending, error: catError, refresh: catRefresh } = useFetch('/api/dashboard/categories')
 // @ts-ignore
-const { data: sections }: any = await useFetch('/api/dashboard/sections?status=active')
-const fetchedCategories = (data.value as unknown as SuccessResponse) || {
-  categories: [],
-}
+const { data: secData, pending: secPending, error: secError, refresh: secRefresh } = useFetch('/api/dashboard/sections?status=active')
+
+const fetchedCategories = computed(() => (catData.value as unknown as SuccessResponse) || { data: { categories: [] } })
+const sections = computed(() => (secData.value as any) || { data: { sections: [] } })
+const isPageLoading = computed(() => catPending.value || secPending.value)
+const isPageError = computed(() => !!catError.value || !!secError.value)
 
 // Composable
 const { role } = useAuth()
 
 const sectionState = ref<Record<string, boolean>>({})
 const slugError = ref<string | null>(null)
-const preview_list = ref<any[]>([])
-const preview_thumbnail = ref<any>()
-const rerender = ref(1)
 const state = reactive<FormType>({
   title: undefined,
   sku: undefined,
@@ -75,10 +74,6 @@ const state = reactive<FormType>({
   slug: undefined,
   product_visibility: undefined,
 })
-
-for (const category of sections?.value?.data?.sections || []) {
-  sectionState.value[category.slug] = false
-}
 
 if (props.product) {
   state.title = props.product?.title
@@ -165,17 +160,8 @@ if (props.product) {
 
 const schema = computed(() => createSchema(!!props.product?.thumbnail))
 const categories = computed(() =>
-  fetchedCategories.data?.categories.map(({ id, name }: any) => ({ id, name })),
+  fetchedCategories.value?.data?.categories?.map(({ id, name }: any) => ({ id, name })) ?? [],
 )
-const fileError = computed(() => {
-  const invalidFile = state.files.some(
-    file => !file.type.startsWith('image/'),
-  )
-  return invalidFile
-    ? 'All files must be images (e.g., .jpg, .jpeg, .png).'
-    : ''
-})
-
 type Schema = z.output<typeof schema.value>
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
@@ -213,36 +199,6 @@ const handleDescription = (content: string | undefined) => {
   state.description = content
 }
 
-const previewSingleFile = (event: any) => {
-  const input = event
-  if (input) {
-    const file = input as File[]
-    const reader = new FileReader()
-    reader.onload = (e: any) => {
-      preview_thumbnail.value = [e.target.result]
-    }
-    state.thumbnail = file[0]
-    reader.readAsDataURL(file[0] as any)
-  }
-}
-
-const previewFiles = (event: any) => {
-  const input = event
-  let count = input.length
-  let index = 0
-  if (input) {
-    while (count--) {
-      const reader = new FileReader()
-      reader.onload = (e: any) => {
-        preview_list.value.push(e.target.result)
-      }
-      state.files.push(input[index])
-      reader.readAsDataURL(input[index])
-      index++
-    }
-  }
-}
-
 const handleAvailability = (text: string) => {
   state.availability = text
 }
@@ -270,23 +226,6 @@ const addLocation = () => {
 
 const removeLocation = (index: number) => {
   state.locationBasedShippingPrice.splice(index, 1)
-}
-
-const handleRemoveImg = (index?: number) => {
-  if (index === undefined) {
-    // Remove thumbnail
-    state.thumbnail = undefined
-    preview_thumbnail.value = undefined
-  }
-  else {
-    // Remove file at index (index is 1-based for files)
-    const fileIndex = index - 1
-    if (fileIndex >= 0 && fileIndex < state.files.length) {
-      state.files.splice(fileIndex, 1)
-      preview_list.value.splice(fileIndex, 1)
-    }
-  }
-  rerender.value++
 }
 
 watch(
@@ -333,38 +272,68 @@ watch(
   },
 )
 
-// Watch for product and sections to load product_visibility
-watch(
-  () => [props.product?.product_visibility, sections?.value?.data?.sections],
-  () => {
-    if (props.product?.product_visibility && sections?.value?.data?.sections) {
-      try {
-        const parsedVisibility = JSON.parse(props.product.product_visibility)
-        // Ensure all section slugs are initialized in sectionState
-        for (const section of sections.value.data.sections) {
-          if (!Object.prototype.hasOwnProperty.call(sectionState.value, section.slug)) {
-            sectionState.value[section.slug] = false
-          }
-        }
-        // Update sectionState with the parsed visibility values
-        for (const key in parsedVisibility) {
-          if (Object.prototype.hasOwnProperty.call(sectionState.value, key)) {
-            sectionState.value[key] = parsedVisibility[key] === true
-          }
-        }
-      }
-      catch {
-        // If parsing fails, keep default values (all false)
+// Initialize sectionState when sections load
+watch(secData, (val) => {
+  const sectionList = (val as any)?.data?.sections
+  if (sectionList?.length) {
+    for (const section of sectionList) {
+      if (!Object.prototype.hasOwnProperty.call(sectionState.value, section.slug)) {
+        sectionState.value[section.slug] = false
       }
     }
-  },
-  { immediate: true },
-)
+  }
+  // Also handle edit mode product_visibility
+  if (props.product?.product_visibility && sectionList?.length) {
+    try {
+      const parsedVisibility = typeof props.product.product_visibility === 'string'
+        ? JSON.parse(props.product.product_visibility)
+        : props.product.product_visibility
+      for (const key in parsedVisibility) {
+        if (Object.prototype.hasOwnProperty.call(sectionState.value, key)) {
+          sectionState.value[key] = parsedVisibility[key] === true
+        }
+      }
+    }
+    catch {
+      // If parsing fails, keep defaults
+    }
+  }
+}, { immediate: true })
 </script>
 
 <template>
-  <UForm :schema="schema" :state="state" @submit="onSubmit">
-    <div id="summary" class="section my-12">
+  <!-- Loading skeleton -->
+  <div v-if="isPageLoading" class="space-y-8">
+    <div v-for="n in 4" :key="n" class="section animate-pulse">
+      <div class="heading">
+        <div class="h-5 w-32 rounded bg-gray-200 dark:bg-white/10" />
+        <div class="mt-2 h-3 w-48 rounded bg-gray-200 dark:bg-white/10" />
+      </div>
+      <div class="content space-y-4">
+        <div class="h-12 w-full rounded-lg bg-gray-200 dark:bg-white/10" />
+        <div class="form-group">
+          <div class="h-12 w-full rounded-lg bg-gray-200 dark:bg-white/10" />
+          <div class="h-12 w-full rounded-lg bg-gray-200 dark:bg-white/10" />
+        </div>
+        <div class="h-32 w-full rounded-lg bg-gray-200 dark:bg-white/10" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Error state -->
+  <div v-else-if="isPageError" class="flex flex-col items-center justify-center py-20 text-center">
+    <Icon name="i-heroicons-exclamation-triangle" class="h-16 w-16 text-red-400 mb-4" />
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Failed to load form data</h3>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Could not load categories or sections. Please try again.</p>
+    <UButton color="primary" size="lg" @click="catRefresh(); secRefresh()">
+      Retry
+    </UButton>
+  </div>
+
+  <!-- Form -->
+  <UForm v-else :schema="schema" :state="state" @submit="onSubmit">
+    <fieldset :disabled="props.isSubmitting" class="contents">
+      <div id="summary" class="section my-12">
       <div class="heading">
         <h3 class="title">
           Summary
@@ -407,85 +376,16 @@ watch(
           Files
         </h3>
         <p class="desc">
-          Edit your product description and necessary information from here
+          Upload product images here
         </p>
       </div>
-      <div class="content">
-        <div :key="rerender" class="form-group">
-          <UFormGroup label="Thumbnail" name="thumbnail">
-            <UInput
-              type="file"
-              size="lg"
-              icon="i-heroicons-folder"
-              @change="previewSingleFile"
-            />
-          </UFormGroup>
-          <UFormGroup label="Additional Images" name="files">
-            <UInput
-              type="file"
-              size="lg"
-              icon="i-heroicons-folder"
-              :color="fileError ? 'red' : undefined"
-              multiple
-              @change="previewFiles"
-            />
-            <p
-              v-if="fileError"
-              class="mt-2 text-red-500 dark:text-red-400 text-sm"
-            >
-              {{ fileError }}
-            </p>
-          </UFormGroup>
-        </div>
-        <div
-          v-if="preview_list.length || preview_thumbnail"
-          class="mt-4 grid grid-cols-3 gap-4"
-        >
-          <div v-if="preview_thumbnail" class="preview-img">
-            <img :src="preview_thumbnail" class="h-56 w-full object-cover">
-            <p class="mb-0 mt-4 px-4">
-              File name: {{ state.thumbnail.name }}
-            </p>
-            <p class="px-4 mb-2.5">
-              Size: {{ state.thumbnail.size / 1024 }}KB
-            </p>
-            <div class="overlay">
-              <svg viewBox="0 0 500 150">
-                <path
-                  d="M0,100 C150,200 350,0 500,100 L500,00 L0,0 Z"
-                  style="stroke: none; fill: #00000040"
-                />
-              </svg>
-              <button type="button" @click="() => handleRemoveImg()">
-                <Icon name="basil:cross-solid" :size="32" />
-              </button>
-            </div>
-          </div>
-          <div
-            v-for="(item, index) in preview_list"
-            :key="index"
-            class="preview-img"
-          >
-            <img :src="item" class="h-56 w-full object-cover">
-            <p class="mb-0 mt-4 px-4">
-              File name: {{ state.files[index].name }}
-            </p>
-            <p class="px-4 mb-2.5">
-              Size: {{ state.files[index].size / 1024 }}KB
-            </p>
-            <div class="overlay">
-              <svg viewBox="0 0 500 150">
-                <path
-                  d="M0,100 C150,200 350,0 500,100 L500,00 L0,0 Z"
-                  style="stroke: none; fill: #00000040"
-                />
-              </svg>
-              <button type="button" @click="() => handleRemoveImg(index + 1)">
-                <Icon name="basil:cross-solid" :size="32" />
-              </button>
-            </div>
-          </div>
-        </div>
+      <div class="content space-y-6">
+        <UFormGroup label="Thumbnail" name="thumbnail">
+          <DashboardProductsImageUploader v-model="state.thumbnail" label="Thumbnail" :max-size-mb="5" :existing-images="product?.thumbnail ? [{ url: product.thumbnail, name: 'Thumbnail' }] : undefined" />
+        </UFormGroup>
+        <UFormGroup label="Additional Images" name="files">
+          <DashboardProductsImageUploader v-model="state.files" label="Additional Images" multiple :max-size-mb="5" :existing-images="product?.files?.map((url: string, i: number) => ({ url, name: `Image ${i + 1}` }))" />
+        </UFormGroup>
       </div>
     </div>
     <div class="group-section">
@@ -948,8 +848,9 @@ watch(
           size="lg"
           :loading="props.isSubmitting"
         />
+        </div>
       </div>
-    </div>
+    </fieldset>
   </UForm>
 </template>
 

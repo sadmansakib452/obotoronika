@@ -137,9 +137,9 @@ export default defineNuxtConfig({
         'localhost',
         '127.0.0.1',
       ],
-      hmr: {
-        protocol: 'wss',
-        clientPort: 443,
+      hmr: process.env.NODE_ENV === 'production' ? undefined : {
+        protocol: 'ws',
+        host: 'localhost',
       },
     },
   },

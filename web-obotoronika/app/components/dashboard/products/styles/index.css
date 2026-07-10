@@ -39,19 +39,3 @@
 .footer {
   @apply bg-white border-t border-dashed fixed left-0 bottom-0 w-full flex justify-end p-2.5 dark:bg-[#111827] dark:border-theme-border;
 }
-
-.preview-img {
-  @apply w-full border rounded-md obotoronika-text-color text-sm dark:border-theme-border relative;
-
-  .overlay {
-    @apply w-full h-full absolute z-10 rounded-md top-0 text-red-500 hidden;
-
-    button {
-      @apply absolute right-0 top-0;
-    }
-  }
-
-  &:hover .overlay {
-    @apply block;
-  }
-}

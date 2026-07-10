@@ -89,7 +89,6 @@ function handleGlobalLoginSuccess() {
 <template>
   <div>
     <LayoutsDefaultHeader v-if="!showCustomerLayout" />
-    <div v-if="!showCustomerLayout" class="py-5" />
     <slot />
     <LayoutsDefaultFooter />
 

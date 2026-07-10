@@ -2,21 +2,23 @@
 
 Last Updated: 2026-07-10
 
-## Current Status: Phase 2 Connection Verification ✅ Complete
+## Current Status: ProductForm Refactoring (Ch 1-3) ✅ Complete
 
 ### Completed — Phase 1: Documentation
-- [x] **Ch 0.1-0.4**: Full system scan (~140 endpoints, 25+ utils, 53 pages, 95 components, 12 stores, 53 migrations, ~35 RPCs)
-- [x] **Ch 1-10**: 29 documentation files in Bengali (pushed to git: `bbb128a`)
+- [x] **Ch 0.1-0.4**: Full system scan
+- [x] **Ch 1-10**: 29 documentation files in Bengali
 
 ### Completed — Phase 2: Connection Verification
-- [x] **Ch 1**: Supabase — URL (200), anon key (auth works), service_role key (REST works), core tables (data present), RPCs tested (get_recommendations ✅, fn_get_return_stats ✅, count_by_role ⚠️ permission denied)
-- [x] **Ch 2**: Cloudflare — Token VERIFIED ✅, Pages project "obotoronika" connected ✅, production branch set to `main` ✅, GitHub workflows fixed (master→main) ✅, env vars updated ✅
-- [x] **Ch 3**: Media Storage — Worker running ✅, R2 bucket exists ✅, upload/serve both work ✅ (previous 500 was test method issue)
-- [x] **Ch 4**: SSLCommerz Sandbox — Session created ✅ (store_id working), Gateway URL generated ✅
-- [x] **Ch 5**: Email SMTP — Gmail app password works ✅ (test email sent)
-- [x] **Ch 6**: Build — Fixed missing `</div>` in `customer/orders/index.vue` ✅, production build passes (17 MB, 3.54 MB gzip)
-- [x] **Deploy**: Live at https://obotoronika-l5o.pages.dev ✅ (auto-deploy on push to `main`)
-- [x] **Connection Info**: Created `.opencode/memory/connection-info.md` (gitignored, Bengali, all credentials + flow)
+- [x] **Ch 1-6**: Supabase, Cloudflare, Media, SSLCommerz, Email, Build all verified
+- [x] **Deploy**: Live at https://obotoronika-l5o.pages.dev
+
+### Completed — Phase 3: Product Create Page Refactoring
+- [x] **Ch 1 (Validation)**: Fixed `cost_price` error msg, `z.coerce.number()` for all number fields, renamed `thumbnailRequired`→`hasExistingThumbnail`
+- [x] **Ch 2 (Loading states)**: Removed `await` from `useFetch`, added `isPageLoading`/`isPageError` computeds, skeleton UI, error state with Retry, `<fieldset :disabled>` during submit
+- [x] **Ch 3 (Image upload)**: Created `ImageUploader.vue` with drag-and-drop, file validation (type + size 5MB), preview grid with hover-to-delete; removed 7 inline state vars + CSS from ProductForm.vue
+- [x] **Build fix**: Removed duplicate `watch(secData)`, fixed missing `}` in `removeLocation()` — brace balance restored
+- [x] **Bug fix (categories)**: `fetchedCategories` changed from plain var to `ComputedRef` → `categories` computed was accessing `ComputedRef.data` (undefined) instead of `.value.data` — fixed with `.value?.data?.categories?.map(...)`
+- [x] **Bug fix (fallback)**: `fetchedCategories` fallback `{ categories: [] }` → `{ data: { categories: [] } }` to match `SuccessResponse` structure
 
 ### Key Issues Found During Scan
 - Auth holes in 5 endpoints (auto-cancel, bandwidth-usage, user-location-summary, has-slug, merchants/:id)
@@ -27,7 +29,6 @@ Last Updated: 2026-07-10
 - No Zod validation in many handlers (manual validation)
 - bKash amount hardcoded
 - Invoice RPC migration needs `supabase db push`
-- ~~Build error in `customer/orders/index.vue:35`~~ ✅ FIXED
 
 ### Config Issues Found (Needs Manual Action)
 - **Cloudflare API Token** — INVALID, regenerate from Cloudflare Dashboard
@@ -39,7 +40,6 @@ Last Updated: 2026-07-10
 ### Next: Feature Work or Bug Fixes
 - EmptyState component → all dashboard tables
 - ConfirmModal component → delete/approve/reject
-- Skeleton loaders → analytics, product pages
-- Fix auth holes in 5 endpoints
+- Fix auth holes in 5 endpoints (auto-cancel, bandwidth-usage, user-location-summary, has-slug, merchants/:id)
 - Fix checkUserRole signature inconsistency
 - Fix bKash amount hardcoded
